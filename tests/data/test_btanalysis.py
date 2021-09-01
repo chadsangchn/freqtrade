@@ -10,7 +10,8 @@ from freqtrade.configuration import TimeRange
 from freqtrade.constants import LAST_BT_RESULT_FN
 from freqtrade.data.btanalysis import (BT_DATA_COLUMNS, BT_DATA_COLUMNS_MID, BT_DATA_COLUMNS_OLD,
                                        analyze_trade_parallelism, calculate_csum,
-                                       calculate_market_change, calculate_max_drawdown,
+                                       calculate_market_change,
+                                       calculate_max_drawdown, calculate_max_drawdown_percent,
                                        combine_dataframes_with_mean, create_cum_profit,
                                        extract_trades_of_period, get_latest_backtest_filename,
                                        get_latest_hyperopt_file, load_backtest_data, load_trades,
@@ -276,6 +277,7 @@ def test_calculate_max_drawdown(testdatadir):
     filename = testdatadir / "backtest-result_test.json"
     bt_data = load_backtest_data(filename)
     drawdown, hdate, lowdate, hval, lval = calculate_max_drawdown(bt_data)
+    drawdown, hdate, lowdate, hval, lval = calculate_max_drawdown_percent(bt_data)
     assert isinstance(drawdown, float)
     assert pytest.approx(drawdown) == 0.21142322
     assert isinstance(hdate, Timestamp)

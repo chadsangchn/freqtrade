@@ -391,6 +391,28 @@ def calculate_max_drawdown(trades: pd.DataFrame, *, date_col: str = 'close_date'
     return abs(min(max_drawdown_df['drawdown'])), high_date, low_date, high_val, low_val
 
 
+def calculate_max_drawdown_percent(trades: pd.DataFrame, starting_balance: float = 0
+                                   ) -> Tuple[float, pd.Timestamp, pd.Timestamp, float, float]:
+    if len(trades) == 0:
+        raise ValueError("Trade dataframe empty.")
+    date_col = 'close_date'
+    profit_results = trades.sort_values(date_col).reset_index(drop=True)
+    max_drawdown_df = pd.DataFrame()
+    max_drawdown_df['net_value'] = profit_results['profit_abs'].cumsum() + starting_balance
+    max_drawdown_df['high_value'] = max_drawdown_df['net_value'].cummax()
+    max_drawdown_df['drawdown_pct'] = (max_drawdown_df['net_value'] - max_drawdown_df['high_value']
+                                       ) / max_drawdown_df['high_value']
+    idxmin = max_drawdown_df['drawdown_pct'].idxmin()
+    if idxmin == 0:
+        raise ValueError("No losing trade, therefore no drawdown.")
+    high_date = profit_results.loc[max_drawdown_df.iloc[:idxmin]['high_value'].idxmax(), date_col]
+    low_date = profit_results.loc[idxmin, date_col]
+    high_val = max_drawdown_df.loc[max_drawdown_df.iloc[:idxmin]
+                                   ['high_value'].idxmax(), 'net_value']
+    low_val = max_drawdown_df.loc[idxmin, 'net_value']
+    return abs(min(max_drawdown_df['drawdown_pct'])), high_date, low_date, high_val, low_val
+
+
 def calculate_csum(trades: pd.DataFrame, starting_balance: float = 0) -> Tuple[float, float]:
     """
     Calculate min/max cumsum of trades, to show if the wallet/stake amount ratio is sane

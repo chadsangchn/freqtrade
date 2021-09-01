@@ -93,6 +93,9 @@ target/
 .pytest_cache/
 .mypy_cache/
 
+# Vim stuff:
+.vimspector.json
+
 #exceptions
 !*.gitkeep
 !config_examples/config_binance.example.json

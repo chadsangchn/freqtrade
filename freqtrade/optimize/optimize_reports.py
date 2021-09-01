@@ -9,7 +9,7 @@ from tabulate import tabulate
 
 from freqtrade.constants import DATETIME_PRINT_FORMAT, LAST_BT_RESULT_FN, UNLIMITED_STAKE_AMOUNT
 from freqtrade.data.btanalysis import (calculate_csum, calculate_market_change,
-                                       calculate_max_drawdown)
+                                       calculate_max_drawdown, calculate_max_drawdown_percent)
 from freqtrade.misc import decimals_per_coin, file_dump_json, round_coin_value
 
 
@@ -388,10 +388,12 @@ def generate_strategy_stats(btdata: Dict[str, DataFrame],
     }
 
     try:
-        max_drawdown, _, _, _, _ = calculate_max_drawdown(
-            results, value_col='profit_ratio')
-        drawdown_abs, drawdown_start, drawdown_end, high_val, low_val = calculate_max_drawdown(
+        # max_drawdown, _, _, _, _ = calculate_max_drawdown(
+        # results, value_col='profit_ratio')
+        drawdown_abs, _, _, _, _ = calculate_max_drawdown(
             results, value_col='profit_abs')
+        max_drawdown, drawdown_start, drawdown_end, high_val, low_val = calculate_max_drawdown_percent(
+                results, starting_balance)
         strat_stats.update({
             'max_drawdown': max_drawdown,
             'max_drawdown_abs': drawdown_abs,
