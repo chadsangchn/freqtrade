@@ -316,7 +316,7 @@ class Backtesting:
                 # This should not be reached...
                 return sell_row[OPEN_IDX]
         else:
-            return sell_row[OPEN_IDX]
+            return min(sell_row[OPEN_IDX], sell_row[HIGH_IDX], sell_row[LOW_IDX], sell_row[CLOSE_IDX])
 
     def _get_sell_trade_entry(self, trade: LocalTrade, sell_row: Tuple) -> Optional[LocalTrade]:
         sell_candle_time = sell_row[DATE_IDX].to_pydatetime()
@@ -377,7 +377,7 @@ class Backtesting:
             has_buy_tag = len(row) >= BUY_TAG_IDX + 1
             trade = LocalTrade(
                 pair=pair,
-                open_rate=row[OPEN_IDX],
+                open_rate=max(row[OPEN_IDX], row[HIGH_IDX], row[LOW_IDX], row[CLOSE_IDX]),
                 open_date=row[DATE_IDX].to_pydatetime(),
                 stake_amount=stake_amount,
                 amount=round(stake_amount / row[OPEN_IDX], 8),
