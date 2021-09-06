@@ -16,6 +16,7 @@ from freqtrade.exceptions import OperationalException
 from freqtrade.exchange import Exchange
 from freqtrade.misc import format_ms_time
 
+from multiprocessing import Pool, cpu_count
 
 logger = logging.getLogger(__name__)
 
@@ -84,13 +85,19 @@ def load_data(datadir: Path,
 
     data_handler = get_datahandler(datadir, data_format)
 
+    pool = Pool(processes=cpu_count()//2)
+    async_result = {}
     for pair in pairs:
-        hist = load_pair_history(pair=pair, timeframe=timeframe,
-                                 datadir=datadir, timerange=timerange,
-                                 fill_up_missing=fill_up_missing,
-                                 startup_candles=startup_candles,
-                                 data_handler=data_handler
-                                 )
+        async_result[pair] = pool.apply_async(
+                load_pair_history,
+                kwds={'pair': pair, 'timeframe': timeframe,
+                      'datadir': datadir, 'timerange': timerange,
+                      'fill_up_missing': fill_up_missing,
+                      'startup_candles': startup_candles,
+                      'data_handler': data_handler
+                      })
+    for pair in pairs:
+        hist = async_result[pair].get()
         if not hist.empty:
             result[pair] = hist
 
