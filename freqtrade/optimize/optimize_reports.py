@@ -171,12 +171,13 @@ def generate_strategy_comparison(all_results: Dict) -> List[Dict]:
 
     tabular_data = []
     for strategy, results in all_results.items():
+        starting_balance = results['config']['dry_run_wallet']
         tabular_data.append(_generate_result_line(
-            results['results'], results['config']['dry_run_wallet'], strategy)
+            results['results'], starting_balance, strategy)
         )
         try:
-            max_drawdown_per, _, _, _, _ = calculate_max_drawdown(results['results'],
-                                                                  value_col='profit_ratio')
+            max_drawdown_per, _, _, _, _ = calculate_max_drawdown_percent(results['results'],
+                                                                          starting_balance)
             max_drawdown_abs, _, _, _, _ = calculate_max_drawdown(results['results'],
                                                                   value_col='profit_abs')
         except ValueError:
